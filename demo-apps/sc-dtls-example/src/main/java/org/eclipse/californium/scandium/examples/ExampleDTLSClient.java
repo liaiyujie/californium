@@ -112,7 +112,7 @@ public class ExampleDTLSClient {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-
+		System.out.println("这是客户端");
 		final CountDownLatch latch = new CountDownLatch(1);
 		ExampleDTLSClient client = new ExampleDTLSClient(latch);
 		InetSocketAddress peer = new InetSocketAddress("localhost", DEFAULT_PORT);

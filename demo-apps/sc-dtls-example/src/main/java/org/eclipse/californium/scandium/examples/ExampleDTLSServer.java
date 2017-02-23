@@ -117,7 +117,7 @@ public class ExampleDTLSServer {
 	}
 
 	public static void main(String[] args) {
-
+		System.out.println("这是服务端");
 		ExampleDTLSServer server = new ExampleDTLSServer();
 		server.start();
 	}
