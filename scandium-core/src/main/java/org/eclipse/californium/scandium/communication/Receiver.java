@@ -28,13 +28,13 @@ public class Receiver {
 			sk3 = new DatagramSocket();				// outgoing channel
 			System.out.println("Receiver: Listening");
 			try {
-				byte[] in_data = new byte[pkt_size];									// message data in packet
-				DatagramPacket in_pkt = new DatagramPacket(in_data,	in_data.length);	// incoming packet
+				byte[] in_data = new byte[pkt_size];								// message data in packet
+				DatagramPacket in_pkt = new DatagramPacket(in_data,	in_data.length);// incoming packet
 				InetAddress dst_addr = InetAddress.getByName("127.0.0.1");
 				
 				FileOutputStream fos = null;
 				// make directory
-				path = ((path.substring(path.length()-1)).equals("/"))? path: path + "/";	// append slash if missing
+				path = ((path.substring(path.length()-1)).equals("/"))? path: path + "/";// append slash if missing
 				File filePath = new File(path);
 				if (!filePath.exists()) filePath.mkdir();
 				
@@ -73,8 +73,8 @@ public class Receiver {
 							
 							// if first packet of transfer
 							if (seqNum==0 && prevSeqNum==-1){
-								int fileNameLength = ByteBuffer.wrap(copyOfRange(in_data, 12, 16)).getInt();	// 0-8:checksum, 8-12:seqnum
-								String fileName = new String(copyOfRange(in_data, 16, 16 + fileNameLength));	// decode file name
+								int fileNameLength = ByteBuffer.wrap(copyOfRange(in_data, 12, 16)).getInt();// 0-8:checksum, 8-12:seqnum
+								String fileName = new String(copyOfRange(in_data, 16, 16 + fileNameLength));// decode file name
 								System.out.println("Receiver: fileName length: " + fileNameLength + ", fileName:" + fileName);
 								
 								// create file
@@ -91,8 +91,8 @@ public class Receiver {
 							// else if not first packet write to FileOutputStream
 							else fos.write(in_data, 12, in_pkt.getLength() - 12);
 							
-							nextSeqNum ++; 			// update nextSeqNum
-							prevSeqNum = seqNum;	// update prevSeqNum
+							nextSeqNum ++; 		// update nextSeqNum
+							prevSeqNum = seqNum;// update prevSeqNum
 						}
 						
 						// if out of order packet received, send duplicate ack

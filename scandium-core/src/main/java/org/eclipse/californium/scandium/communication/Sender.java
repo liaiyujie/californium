@@ -15,9 +15,11 @@ import java.util.zip.CRC32;
 
 // The following implementation uses the Go-Back-N protocol
 public class Sender {
-	static int data_size = 988;			// (checksum:8, seqNum:4, data<=988) Bytes : 1000 Bytes total
+	// (checksum:8, seqNum:4, data<=988) Bytes : 1000 Bytes total
+	static int data_size = 988;
 	static int win_size = 10;
-	static int timeoutVal = 300;		// 300ms until timeout
+	// 300ms until timeout
+	static int timeoutVal = 300;
 
 	int base;					// base sequence number of window
 	int nextSeqNum;				// next sequence number in window
@@ -53,13 +55,15 @@ public class Sender {
 		
 		// constructs the packet prepended with header information
 		public byte[] generatePacket(int seqNum, byte[] dataBytes){
-			byte[] seqNumBytes = ByteBuffer.allocate(4).putInt(seqNum).array(); 				// Seq num (4 bytes)
+			// Seq num (4 bytes)
+			byte[] seqNumBytes = ByteBuffer.allocate(4).putInt(seqNum).array(); 				
 			
 			// generate checksum 
 			CRC32 checksum = new CRC32();
 			checksum.update(seqNumBytes);
 			checksum.update(dataBytes);
-			byte[] checksumBytes = ByteBuffer.allocate(8).putLong(checksum.getValue()).array();	// checksum (8 bytes)
+			// checksum (8 bytes)
+			byte[] checksumBytes = ByteBuffer.allocate(8).putLong(checksum.getValue()).array();	
 			
 			// generate packet
 			ByteBuffer pktBuf = ByteBuffer.allocate(8 + 4 + dataBytes.length);
@@ -72,7 +76,8 @@ public class Sender {
 		// sending process (updates nextSeqNum)
 		public void run(){
 			try{
-				 dst_addr = InetAddress.getByName("127.0.0.1"); // resolve dst_addr
+				// resolve dst_addr
+				 dst_addr = InetAddress.getByName("127.0.0.1"); 
 				// create byte stream
 				FileInputStream fis = new FileInputStream(new File(path));
 				 
@@ -82,8 +87,10 @@ public class Sender {
 						// send packets if window is not yet full
 						if (nextSeqNum < base + win_size){
 							
-							s.acquire();	/***** enter CS *****/
-							if (base == nextSeqNum) setTimer(true);	// if first packet of window, start timer
+							s.acquire();
+							/***** enter CS *****/
+							// if first packet of window, start timer
+							if (base == nextSeqNum) setTimer(true);	
 							
 							byte[] out_data = new byte[10];
 							boolean isFinalSeqNum = false;
@@ -102,9 +109,9 @@ public class Sender {
 									int dataLength = fis.read(dataBuffer, 0, data_size - 4 - fileNameBytes.length);
 									byte[] dataBytes = copyOfRange(dataBuffer, 0, dataLength);
 									ByteBuffer BB = ByteBuffer.allocate(4 + fileNameBytes.length + dataBytes.length);
-									BB.put(fileNameLengthBytes);	// file name length
-									BB.put(fileNameBytes);			// file name
-									BB.put(dataBytes);				// file data slice
+									BB.put(fileNameLengthBytes);// file name length
+									BB.put(fileNameBytes);		// file name
+									BB.put(dataBytes);			// file data slice
 									out_data = generatePacket(nextSeqNum, BB.array());
 								}
 								// else if subsequent packets
@@ -165,7 +172,8 @@ public class Sender {
 			byte[] ackNumBytes = copyOfRange(pkt, 8, 12);
 			CRC32 checksum = new CRC32();
 			checksum.update(ackNumBytes);
-			byte[] calculated_checksumBytes = ByteBuffer.allocate(8).putLong(checksum.getValue()).array();// checksum (8 bytes)
+			// checksum (8 bytes)
+			byte[] calculated_checksumBytes = ByteBuffer.allocate(8).putLong(checksum.getValue()).array();
 			if (Arrays.equals(received_checksumBytes, calculated_checksumBytes)) return ByteBuffer.wrap(ackNumBytes).getInt();
 			else return -1;
 		}
@@ -198,8 +206,10 @@ public class Sender {
 							else{
 								base = ackNum++;	// update base number
 								s.acquire();	/***** enter CS *****/
-								if (base == nextSeqNum) setTimer(false);	// if no more unacknowledged packets in pipe, off timer
-								else setTimer(true);						// else packet acknowledged, restart timer
+								// if no more unacknowledged packets in pipe, off timer
+								if (base == nextSeqNum) setTimer(false);	
+								// else packet acknowledged, restart timer
+								else setTimer(true);						
 								s.release();	/***** leave CS *****/
 							}
 						}
